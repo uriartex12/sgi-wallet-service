@@ -1,0 +1,244 @@
+openapi: 3.0.0
+info:
+  title: Card Service API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8087
+paths:
+  /v1/wallets:
+    get:
+      summary: Retrieve all wallets
+      operationId: getAllWallets
+      responses:
+        '200':
+          description: List of wallets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WalletResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      summary: Create a wallet
+      operationId: createWallet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletRequest'
+      responses:
+        '201':
+          description: Card created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/wallets/{walletId}:
+    get:
+      summary: Retrieve a wallet by ID
+      operationId: getWalletById
+      parameters:
+        - name: walletId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Wallet details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletResponse'
+        '404':
+          description: Card not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      summary: Update
+      operationId: updateWallet
+      parameters:
+        - name: walletId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletRequest'
+      responses:
+        '200':
+          description: Updated wallet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          '404':
+            description: Wallet not found
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+          '500':
+            description: Internal server error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Delete a wallet
+      operationId: deleteWallet
+      parameters:
+        - name: walletId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Wallet deleted
+        '404':
+          description: Wallet not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/wallets/{phone}/balance:
+    get:
+      summary: Get wallet balances
+      operationId: getPrimaryAccountBalance
+      parameters:
+        - name: phone
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Wallet balance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+        '404':
+          description: Phone not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    WalletRequest:
+      type: object
+      required:
+        - dni
+        - phone
+        - associatedCardId
+      properties:
+        dni:
+          type: string
+        phone:
+          type: string
+        imei:
+          type: string
+        email:
+          type: string
+        associatedCardId:
+          type: string
+        balance:
+          type: decimal
+    WalletResponse:
+      type: object
+      required:
+        - dni
+        - phone
+        - imei
+      properties:
+        id:
+          type: string
+        dni:
+          type: string
+        phone:
+          type: string
+        imei:
+          type: string
+        email:
+          type: string
+        associatedCardId:
+          type: string
+        balance:
+          type: decimal
+    ErrorResponse:
+      type: object
+      required:
+        - status
+        - code
+        - message
+        - timestamp
+      properties:
+        status:
+          type: int
+        code:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+    BalanceResponse:
+      type: object
+      properties:
+        walletId:
+          type: string
+        wall:
+          type: string
+        balance:
+          type: decimal
