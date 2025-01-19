@@ -1,5 +1,6 @@
 package com.sgi.wallet.infrastructure.subscriber.events;
 
+import com.sgi.wallet.infrastructure.dto.UserDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,15 +12,16 @@ import java.math.BigDecimal;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrchestratorEventResponse {
-
-    private String cardId;
+public class OrchestratorWalletEvent implements EventHandle {
+    private String walletId;
     private String accountId;
     private String clientId;
     private String type;
-    private String status;
     private BigDecimal amount;
+    private String source;
     private BigDecimal balance;
+    private String description;
+    private UserDTO sender;
+    private UserDTO receiver;
 
-    public static final String TOPIC = "OrchestratorEventResponse";
 }

@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum CustomError {
 
-    E_OPERATION_FAILED(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, "WALLET-000", "Operation failed"));
+    E_OPERATION_FAILED(new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, "WALLET-000", "Operation failed")),
+    E_INSUFFICIENT_BALANCE(new ApiError(HttpStatus.PAYMENT_REQUIRED, "WALLET-002", "Insufficient balance")),
+    E_WALLET_NOT_FOUND(new ApiError(HttpStatus.NOT_FOUND, "WALLET-001", "Wallet not found"));
     private final ApiError error;
 }

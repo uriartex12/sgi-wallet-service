@@ -11,3 +11,9 @@ spring:
       profile: ${PROFILE:dev}
   config:
     import: optional:configserver:${CONFIG_SERVER_URI:http://localhost:8888}
+
+redis:
+  host: localhost
+  port: 6379
+  password: bootcamp-bcp
+  reactive: true

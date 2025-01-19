@@ -1,9 +1,9 @@
 openapi: 3.0.0
 info:
-  title: Card Service API
+  title: Yanki Wallet API
   version: 1.0.0
 servers:
-  - url: http://localhost:8087
+  - url: http://localhost:8091
 paths:
   /v1/wallets:
     get:
@@ -148,7 +148,7 @@ paths:
   /v1/wallets/{phone}/balance:
     get:
       summary: Get wallet balances
-      operationId: getPrimaryAccountBalance
+      operationId: getPrimaryWalletBalance
       parameters:
         - name: phone
           in: path
@@ -174,16 +174,131 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /v1/wallets/{walletId}/associate:
+    post:
+      summary: Associate a wallet to a debit card
+      operationId: associateDebitCard
+      tags:
+        - Wallets
+      parameters:
+        - name: walletId
+          in: path
+          required: true
+          description: Wallet ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssociateRequest'
+      responses:
+        '200':
+          description: Wallet successfully associated with the debit card
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletResponse'
+          '400':
+            description: Malformed Wallet data
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+          '404':
+            description: Wallet not found
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+          '500':
+            description: Internal server error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+  /v1/wallets/yankear:
+    post:
+      summary: Perform a money transfer between two users via yankear
+      description: Allows a user to send money to another user via their phone number
+      operationId: yankearWallet
+      tags:
+        - Wallet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/YankearRequest'
+      responses:
+        '200':
+          description: Yankear transfer successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/YankearResponse'
+          '400':
+            description: Bad request error, such as insufficient balance or invalid data
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+          '404':
+            description: User or wallet not found
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+          '500':
+            description: Internal server error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+  /v1/wallets/{walletId}/transactions:
+    get:
+      summary: Get wallet transactions
+      operationId: getWalletTransactions
+      parameters:
+        - name: walletId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Wallet transactions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletResponse'
+        '404':
+          description: Wallet not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
     WalletRequest:
       type: object
       required:
+        - name
         - dni
         - phone
-        - associatedCardId
       properties:
-        dni:
+        name:
+          type: string
+        documentNumber:
+          type: string
+        documentType:
           type: string
         phone:
           type: string
@@ -191,20 +306,21 @@ components:
           type: string
         email:
           type: string
-        associatedCardId:
-          type: string
-        balance:
-          type: decimal
     WalletResponse:
       type: object
       required:
+        - name
         - dni
         - phone
-        - imei
+        - debitCardId
       properties:
         id:
           type: string
-        dni:
+        name:
+          type: string
+        documentNumber:
+          type: string
+        documentType:
           type: string
         phone:
           type: string
@@ -212,10 +328,12 @@ components:
           type: string
         email:
           type: string
-        associatedCardId:
-          type: string
+        debitCardId:
+          type: string,
         balance:
           type: decimal
+        transactions:
+          type: array
     ErrorResponse:
       type: object
       required:
@@ -238,7 +356,51 @@ components:
       properties:
         walletId:
           type: string
-        wall:
+        name:
+          type: string
+        phone:
           type: string
         balance:
           type: decimal
+    AssociateRequest:
+      type: object
+      required:
+        - debitCardId
+      properties:
+        debitCardId:
+          type: string
+    YankearRequest:
+      type: object
+      required:
+        - fromPhoneNumber
+        - toPhoneNumber
+        - amount
+      properties:
+        fromPhoneNumber:
+          type: string
+        toPhoneNumber:
+          type: string
+        amount:
+          type: decimal
+        description:
+          type: string
+    YankearResponse:
+      type: object
+      required:
+        - name
+        - PhoneNumber
+        - amount
+        - description
+        - timestamp
+      properties:
+        name:
+          type: string
+        PhoneNumber:
+          type: string
+        amount:
+          type: decimal
+        description:
+          type: string
+        timestamp:
+          type: string
+          format : date-time
