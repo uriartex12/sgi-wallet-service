@@ -8,7 +8,6 @@ import org.springframework.kafka.support.converter.StringJsonMessageConverter;
 
 import static com.sgi.wallet.infrastructure.mapper.ObjectMappers.OBJECT_MAPPER;
 
-
 @Configuration
 @Slf4j
 public class KafkaJsonMessageConvertorConfiguration {

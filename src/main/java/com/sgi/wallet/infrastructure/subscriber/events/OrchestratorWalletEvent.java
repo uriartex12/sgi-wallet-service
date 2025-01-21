@@ -18,10 +18,12 @@ public class OrchestratorWalletEvent implements EventHandle {
     private String clientId;
     private String type;
     private BigDecimal amount;
-    private String source;
+    private String paymentMethod;
     private BigDecimal balance;
     private String description;
     private UserDTO sender;
     private UserDTO receiver;
+
+    public static final String TOPIC = "OrchestratorWalletEvent";
 
 }

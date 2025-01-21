@@ -334,6 +334,8 @@ components:
           type: decimal
         transactions:
           type: array
+        CardDetails:
+          $ref: '#/components/schemas/CardDetails'
     ErrorResponse:
       type: object
       required:
@@ -404,3 +406,17 @@ components:
         timestamp:
           type: string
           format : date-time
+    CardDetails:
+      type: object
+      required:
+        - accountId
+        - type
+        - clientId
+      properties:
+        accountId:
+          type: string
+        type:
+          type: string
+        clientId:
+          type: string
+

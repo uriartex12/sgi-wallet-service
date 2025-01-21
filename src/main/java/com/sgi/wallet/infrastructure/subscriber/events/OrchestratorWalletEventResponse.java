@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class OrchestratorWalletEventResponse {
     private String status;
+    private String transactionId;
     private String walletId;
     private String accountId;
     private String clientId;

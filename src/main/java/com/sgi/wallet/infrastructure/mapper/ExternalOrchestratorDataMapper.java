@@ -13,12 +13,12 @@ public interface ExternalOrchestratorDataMapper {
 
     ExternalOrchestratorDataMapper INSTANCE = Mappers.getMapper(ExternalOrchestratorDataMapper.class);
 
-    default OrchestratorWalletEvent map(Wallet froYankiWallet, String source,
+    default OrchestratorWalletEvent map(Wallet froYankiWallet, String paymentMethod,
                                         YankearRequest yankearRequest, MovementType movement,
                                         UserDTO userSend, UserDTO userReceiver){
         return OrchestratorWalletEvent.builder()
                 .walletId(froYankiWallet.getId())
-                .source(source)
+                .paymentMethod(paymentMethod)
                 .type(movement.name())
                 .description(yankearRequest.getDescription())
                 .accountId(froYankiWallet.getCardDetails().accountId())

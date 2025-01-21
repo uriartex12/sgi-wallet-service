@@ -14,8 +14,10 @@ public interface WalletService {
     Mono<WalletResponse> getWalletById(String walletId);
     Mono<WalletResponse> associateDebitCard(String walletId, Mono<AssociateRequest> associateRequest);
     Mono<WalletResponse> updateWallet(String walletId, Mono<WalletRequest> walletRequestMono);
-    Mono<WalletResponse> updateBalanceAndCardDetailsByCardId(String cardId, CardDetails cardDetails, BigDecimal balance);
+    Mono<WalletResponse> currentBalanceAndCardDetailsByCardId(String cardId, CardDetails cardDetails, BigDecimal balance);
     Mono<YankearResponse> yankearWallet(Mono<YankearRequest> yankearRequestMono);
     Mono<WalletResponse> getWalletTransactions(String walletId);
     Mono<BalanceResponse> getPrimaryWalletBalance(String phone);
+    Mono<WalletResponse> rollbackBalanceDueToServerError(String walletId, BigDecimal balance);
+    Mono<WalletResponse> updatedBalanceDueToOperation(String accountId, BigDecimal balance);
 }

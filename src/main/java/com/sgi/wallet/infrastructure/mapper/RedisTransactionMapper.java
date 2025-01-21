@@ -11,6 +11,6 @@ public interface RedisTransactionMapper {
 
     RedisTransactionMapper INSTANCE = Mappers.getMapper(RedisTransactionMapper.class);
 
-    @Mapping(target = "id", expression = "java(java.util.UUID.randomUUID().toString())")
+    @Mapping(target = "id", source = "orchestratorWallet.transactionId")
     Transaction map(OrchestratorWalletEventResponse orchestratorWallet);
 }

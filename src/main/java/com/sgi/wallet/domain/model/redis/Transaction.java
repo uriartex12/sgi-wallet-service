@@ -1,10 +1,7 @@
 package com.sgi.wallet.domain.model.redis;
 
 import com.sgi.wallet.infrastructure.dto.UserDTO;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.redis.core.RedisHash;
@@ -14,6 +11,7 @@ import java.math.BigDecimal;
 
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @RedisHash(value = "transaction-wallet", timeToLive = 86400L)

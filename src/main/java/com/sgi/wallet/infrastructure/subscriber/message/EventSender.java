@@ -5,10 +5,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
-
-import java.util.concurrent.CompletableFuture;
 
 
 @Component
@@ -22,10 +19,9 @@ public class EventSender {
     }
 
     @SneakyThrows
-    public CompletableFuture<SendResult<String, Object>> sendEvent(Object event) {
-            String topic = event.getClass().getSimpleName();
+    public void sendEvent(String topic, Object event) {
             String value = ObjectMappers.OBJECT_MAPPER.writeValueAsString(event);
             log.info("Publishing to Kafka topic {}: {}", topic, event);
-            return kafkaTemplate.send(new ProducerRecord<>(topic, value));
+        kafkaTemplate.send(new ProducerRecord<>(topic, value));
     }
 }

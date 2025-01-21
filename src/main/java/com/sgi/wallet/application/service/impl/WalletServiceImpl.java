@@ -69,7 +69,7 @@ public class WalletServiceImpl implements WalletService {
                 .switchIfEmpty(Mono.error(new CustomException(CustomError.E_WALLET_NOT_FOUND)))
                 .zipWith(associateRequestMono, (wallet, request) -> {
                     wallet.setDebitCardId(request.getDebitCardId());
-                    kafkaTemplate.sendEvent(new BalanceEvent(request.getDebitCardId()));
+                    kafkaTemplate.sendEvent(BalanceEvent.TOPIC, new BalanceEvent(request.getDebitCardId()));
                     return wallet;
                 })
                 .flatMap(walletRepository::save)
@@ -90,12 +90,33 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public Mono<WalletResponse> updateBalanceAndCardDetailsByCardId(String cardId, CardDetails cardDetails, BigDecimal balance) {
+    public Mono<WalletResponse> currentBalanceAndCardDetailsByCardId(String cardId, CardDetails cardDetails, BigDecimal balance) {
         return walletRepository.findByDebitCardId(cardId)
                 .switchIfEmpty(Mono.error(new CustomException(CustomError.E_WALLET_NOT_FOUND)))
                 .flatMap(wallet -> {
                         wallet.setBalance(balance);
                     wallet.setCardDetails(cardDetails);
+                    return walletRepository.save(wallet)
+                            .map(WalletMapper.INSTANCE::map);
+                });
+    }
+    @Override
+    public Mono<WalletResponse> rollbackBalanceDueToServerError(String walletId, BigDecimal balance) {
+        return walletRepository.findById(walletId)
+                .switchIfEmpty(Mono.error(new CustomException(CustomError.E_WALLET_NOT_FOUND)))
+                .flatMap(wallet -> {
+                    wallet.setBalance(wallet.getBalance().add(balance));
+                    return walletRepository.save(wallet)
+                            .map(WalletMapper.INSTANCE::map);
+                });
+    }
+
+    @Override
+    public Mono<WalletResponse> updatedBalanceDueToOperation(String accountId, BigDecimal balance) {
+        return walletRepository.findByCardDetailsAccountId(accountId)
+                .switchIfEmpty(Mono.error(new CustomException(CustomError.E_WALLET_NOT_FOUND)))
+                .flatMap(wallet -> {
+                    wallet.setBalance(wallet.getBalance().add(balance));
                     return walletRepository.save(wallet)
                             .map(WalletMapper.INSTANCE::map);
                 });
@@ -115,14 +136,15 @@ public class WalletServiceImpl implements WalletService {
                                             fromWallet.setBalance(fromWallet.getBalance().subtract(yankearRequest.getAmount()));
                                             toWallet.setBalance(toWallet.getBalance().add(yankearRequest.getAmount()));
                                             List<UserDTO> yankearUsers = createWalletUser(fromWallet, toWallet);
-                                            UserDTO userSender = yankearUsers.get(0);
-                                            UserDTO userReceiver = yankearUsers.get(1);
                                             OrchestratorWalletEvent fromWalletEvent = ExternalOrchestratorDataMapper.INSTANCE
-                                                    .map(fromWallet, YANKEAR, yankearRequest, MovementType.DEBIT, userSender, userReceiver);
+                                                    .map(fromWallet, YANKEAR, yankearRequest, MovementType.DEBIT, yankearUsers.get(0), yankearUsers.get(1));
                                             OrchestratorWalletEvent toWalletEvent = ExternalOrchestratorDataMapper.INSTANCE
-                                                    .map(toWallet,  YANKEAR, yankearRequest, MovementType.CREDIT, userSender, userReceiver);
+                                                    .map(toWallet,  YANKEAR, yankearRequest, MovementType.CREDIT, yankearUsers.get(1), yankearUsers.get(0));
+
                                             Stream.of(fromWalletEvent, toWalletEvent)
-                                                    .forEach(kafkaTemplate::sendEvent);
+                                                    .forEach(orchestratorWalletEvent ->
+                                                            kafkaTemplate.sendEvent(OrchestratorWalletEvent.TOPIC,
+                                                                    orchestratorWalletEvent));
                                             return Flux.fromIterable(List.of(fromWallet, toWallet));
                                         }
                                 )
@@ -130,11 +152,10 @@ public class WalletServiceImpl implements WalletService {
                                         walletRepository.saveAll(walletList)
                                                 .then(Mono.just(new YankearResponse(
                                                         Objects.requireNonNull(walletList.blockLast()).getName(),
-                                                        yankearRequest.getToPhoneNumber(),
-                                                        yankearRequest.getAmount(),
+                                                        yankearRequest.getToPhoneNumber(), yankearRequest.getAmount(),
                                                         yankearRequest.getDescription(),
-                                                        OffsetDateTime.now()
-                                                )))
+                                                        OffsetDateTime.now()))
+                                                )
                                 )
                 );
     }

@@ -9,7 +9,7 @@ import reactor.core.publisher.Mono;
 public interface WalletRepositoryJpa extends ReactiveMongoRepository<Wallet, String> {
 
     Mono<Wallet> findByDebitCardId(String cardId);
-
     Mono<Wallet> findByPhone(String phone);
+    Mono<Wallet> findByCardDetailsAccountId(String accountId);
 
 }

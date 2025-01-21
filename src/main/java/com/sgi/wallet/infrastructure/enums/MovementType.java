@@ -2,5 +2,11 @@ package com.sgi.wallet.infrastructure.enums;
 
 public enum MovementType {
     DEBIT,
-    CREDIT;
+    CREDIT,
+    DEPOSIT,
+    WITHDRAWAL,
+    PAYMENT,
+    PURCHASE,
+    CHARGE,
+    SALE;
 }
