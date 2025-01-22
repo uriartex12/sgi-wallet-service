@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.redis.core.RedisHash;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -16,6 +17,9 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @RedisHash(value = "transaction-wallet", timeToLive = 86400L)
 public class Transaction implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 7924654226538059017L;
+
     @Id
     @Indexed
     private String id;

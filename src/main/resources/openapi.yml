@@ -291,7 +291,7 @@ components:
       type: object
       required:
         - name
-        - dni
+        - documentNumber
         - phone
       properties:
         name:

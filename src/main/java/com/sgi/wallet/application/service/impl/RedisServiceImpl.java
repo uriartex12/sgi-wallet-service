@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.SerializationException;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -52,7 +53,14 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public List<Transaction> findAllTransactionsByWalletId(String walletId) {
-        return Optional.ofNullable((List<Transaction>) hashOperations.get(TRANSACTION_HASH, walletId))
-                .orElseGet(Collections::emptyList);
+        try {
+            return Optional.ofNullable((List<Transaction>) hashOperations.get(TRANSACTION_HASH, walletId))
+                    .orElseGet(Collections::emptyList);
+
+        } catch (SerializationException e) {
+            log.error("Error deserializando las transacciones desde Redis para walletId: {}", walletId, e);
+            return Collections.emptyList();
+        }
     }
+
 }
