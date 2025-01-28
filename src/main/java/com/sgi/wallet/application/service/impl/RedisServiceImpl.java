@@ -56,9 +56,8 @@ public class RedisServiceImpl implements RedisService {
         try {
             return Optional.ofNullable((List<Transaction>) hashOperations.get(TRANSACTION_HASH, walletId))
                     .orElseGet(Collections::emptyList);
-
         } catch (SerializationException e) {
-            log.error("Error deserializando las transacciones desde Redis para walletId: {}", walletId, e);
+            log.error("Error deserializing transactions from Redis for walletId: {}", walletId, e);
             return Collections.emptyList();
         }
     }
